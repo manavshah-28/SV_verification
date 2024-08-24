@@ -3,8 +3,9 @@
 
 module FSM
   (
-    input wire Stream,
-    output wire Tone
+    input wire Stream, // input bitstream is given at this pin
+    output wire Tone,  // this output is high when 
+    output logic [2:0] Count
   );
   
   localparam S0 = 3'b000,
@@ -17,6 +18,7 @@ module FSM
   
   reg [2:0] cur_state,nxt_state; // 3 bit registers
   reg [2:0] count;
+  
   initial begin 
     cur_state = 3'b000;
     nxt_state = 3'b000;

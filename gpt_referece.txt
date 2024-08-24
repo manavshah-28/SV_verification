@@ -1,0 +1,186 @@
+To create a comprehensive SystemVerilog testbench for your FSM sequence detector, we need to include several components: the monitor, driver, scoreboard, generator, environment, interface, test, and testbench. Each of these components plays a distinct role in verifying the functionality of your DUT (Design Under Test).
+
+Here's a detailed breakdown of each component and the complete SystemVerilog testbench code:
+
+### 1. Interface
+The interface defines the signals shared between the DUT and the testbench components.
+
+```systemverilog
+interface fsm_if(input bit clk);
+    logic Stream;
+    logic Tone;
+    logic [2:0] Count;
+endinterface
+```
+
+### 2. Driver
+The driver generates stimulus for the DUT.
+
+```systemverilog
+class fsm_driver;
+    virtual fsm_if vif;
+
+    function new(virtual fsm_if vif);
+        this.vif = vif;
+    endfunction
+
+    task drive(input bit Stream);
+        vif.Stream = Stream;
+        @ (posedge vif.clk);
+    endtask
+endclass
+```
+
+### 3. Monitor
+The monitor observes the DUT’s outputs and checks if the DUT behaves correctly.
+
+```systemverilog
+class fsm_monitor;
+    virtual fsm_if vif;
+
+    function new(virtual fsm_if vif);
+        this.vif = vif;
+    endfunction
+
+    task monitor();
+        // Observe the outputs and compare with expected values.
+        @ (posedge vif.clk);
+        if (vif.Tone === 1'b1) begin
+            $display("Sequence Detected at time %0t", $time);
+        end
+        if (vif.Count !== 3'b000) begin
+            $display("Count is %b at time %0t", vif.Count, $time);
+        end
+    endtask
+endclass
+```
+
+### 4. Scoreboard
+The scoreboard maintains the expected results and compares them against actual DUT outputs.
+
+```systemverilog
+class fsm_scoreboard;
+    logic [2:0] expected_count;
+    logic expected_tone;
+
+    function new();
+        expected_count = 3'b000;
+        expected_tone = 1'b0;
+    endfunction
+
+    task update_scoreboard(logic [2:0] Count, logic Tone);
+        // Update scoreboard with the expected results
+        expected_count = Count;
+        expected_tone = Tone;
+    endtask
+
+    task check_results(logic [2:0] Count, logic Tone);
+        if (Count !== expected_count) begin
+            $display("Error: Count mismatch at time %0t", $time);
+        end
+        if (Tone !== expected_tone) begin
+            $display("Error: Tone mismatch at time %0t", $time);
+        end
+    endtask
+endclass
+```
+
+### 5. Generator
+The generator creates random or specified stimulus for the DUT.
+
+```systemverilog
+class fsm_generator;
+    virtual fsm_if vif;
+
+    function new(virtual fsm_if vif);
+        this.vif = vif;
+    endfunction
+
+    task generate();
+        // Randomly generate stimulus for the DUT
+        foreach (int i in [0:10]) begin
+            vif.Stream = $random % 2;
+            @ (posedge vif.clk);
+        end
+    endtask
+endclass
+```
+
+### 6. Environment
+The environment connects all testbench components together.
+
+```systemverilog
+class fsm_env;
+    fsm_if vif;
+    fsm_driver driver;
+    fsm_monitor monitor;
+    fsm_scoreboard scoreboard;
+    fsm_generator generator;
+
+    function new(fsm_if vif);
+        this.vif = vif;
+        driver = new(vif);
+        monitor = new(vif);
+        scoreboard = new();
+        generator = new(vif);
+    endfunction
+
+    task run();
+        fork
+            driver.drive();
+            monitor.monitor();
+            generator.generate();
+        join
+    endtask
+endclass
+```
+
+### 7. Test
+The test initializes the environment and runs the simulation.
+
+```systemverilog
+module fsm_test;
+    fsm_if vif;
+    fsm_env env;
+
+    initial begin
+        vif = new;
+        env = new(vif);
+
+        // Apply stimulus and monitor outputs
+        env.run();
+
+        // Finish simulation after a certain time
+        #100;
+        $finish;
+    end
+endmodule
+```
+
+### 8. Testbench
+The testbench instantiates the DUT and connects it with the testbench components.
+
+```systemverilog
+module fsm_tb;
+    logic clk;
+    fsm_if vif(clk);
+    FSM dut(
+        .Stream(vif.Stream),
+        .Tone(vif.Tone),
+        .Count(vif.Count)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    // Instantiate the test
+    fsm_test test();
+endmodule
+```
+
+### Summary
+
+This testbench setup provides a robust framework for verifying your FSM sequence detector. It includes the interface for connecting components, a driver for generating inputs, a monitor for observing outputs, a scoreboard for result comparison, a generator for creating stimulus, and an environment for managing and executing the test. Finally, the test and testbench modules tie everything together for a complete verification process.
