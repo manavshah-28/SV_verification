@@ -3,6 +3,7 @@
 
 module FSM
   (
+    input clk,
     input wire Stream, // input bitstream is given at this pin
     output wire Tone,  // this output is high when 
     output logic [2:0] Count

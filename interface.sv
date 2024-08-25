@@ -1,7 +1,5 @@
-interface intf();
- logic a;
- logic b;
- logic c;
- logic sum;
- logic carry;
+interface intf(input logic clk);
+ logic Stream;
+ logic Tone;
+ logic [2:0]Count;
 endinterface 
