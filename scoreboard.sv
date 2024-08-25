@@ -1,25 +1,18 @@
+// Scoreboard receives transaction objects from monitor, compares it to the expected result.
 class scoreboard;
-    mailbox mon2scb;
 
-// this is the constructor of the scoreboard class
-function new(mailbox mon2scb);
- this.mon2scb = mon2scb;
- endfunction
+    mailbox mon_scb; // mailbox between monitor and scoreboard 
 
- task main();
- transaction tran;
- repeat(2)
- begin 
-    mon2scb.get(tran); // use the mailbox to get the transaction
-    tran.display("scoreboard signals");
+    function new(mailbox mon_scb);
+    this.mon_scb = mon_scb;
+    endfunction
 
-    // create a golden reference of the DUT
-    if(((tran.a ^ tran.b ^ tran.c_in) == tran.sum) && (((tran.a & tran.b) | (tran.b & tran.c_in) | (tran.c_in & tran.a)) == tran.c_out))
-        $display("********* PASS *********");
-    else
-        $display("!!!!!!!!! FAIL !!!!!!!!!");
-        $display("Transaction done");
-        $display(" ");
- end
- endtask
- endclass
+    task run();
+        transaciton Stream;
+        forever begin
+
+            mon_scb.get(Stream);
+            $display("Stream bit = %0b", Stream);
+        end
+    endtask
+endclass
