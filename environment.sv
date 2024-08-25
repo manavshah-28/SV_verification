@@ -7,36 +7,49 @@
 `include "scoreboard.sv"
 
 class environment;
-    generator gen;
-    driver drv;
-    monitor mon;
-    scoreboard scb;
-
-    mailbox gen2drv;
-    mailbox mon2scb;
+    driver d0;
+    generator g0;
+    monitor m0;
+    scoreboard s0;
 
     virtual intf vif;
-// constructor of the env class
-    function new (virtual intf vif);
-    this.vif = vif;
-// calling all the new methods 
-    gen2drv = new();
-    mon2scb = new();
-    gen = new(gen2drv);
-    drv = new(vif,gen2drv);
-    mon = new(vif,mon2scb);
-    scb = new(mon2scb);
+    mailbox gen_drive; // mailbox between generator and driver
+    mailbox mon_scb;   // mailbox between monitor and scoreboard 
+
+    function new( virtual intf vif);
+        this.vif = vif;
+
+        // create mailbox  
+        gen_drive = new();
+        mon_scb = new();
+        
+        // create generator and driver
+        g0 = new(gen_drive);
+        d0 = new(vif, gen_drive);
+        m0 = new(vif,mon_scb);
+        s0 = new(mon_scb);
 
     endfunction
 
-    task test_run();
-    fork // start all tasks together, since all have main tasks
-        gen.main();
-        drv.main();
-        mon.main();
-        scb.main();
-    join // come out of the fork when all things are complete
+    task run();
+
+        d0.reset();
+
+        fork
+            d0.run();
+            g0.run();
+            m0.run();
+            s0.run();
+        join_any
+        
+        // wait until all the transactions have been created by the generator 
+        wait(g0.done.triggered);
+        
+        // wait until all transactions have been driver to the DUT
+        wait(g0.count == d0.num_transactions);
+
+        $finish;
+        
     endtask
+
 endclass
-
-
