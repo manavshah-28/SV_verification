@@ -1,33 +1,25 @@
-// Monitor : gets information from DUT
+// monitor converts signal activity to transaction level objects
 
 class monitor;
 
-virtual intf vif;
-mailbox mon2scb; // mailbox betwwen monitor and scoreboard 
+    virtual intf vif;
 
-function new(virtual intf vif,mailbox mon2scb);
-this.vif=vif;
-this.mon2scb = mon2scb;
-endfunction
-task main();
-repeat(2);
-#1;
-begin
-    transaciton tran;
-    tran = new(); // constructor, creating object of class transaction
-    
-    //sampling the data here
-    tran.a = vif.a;
-    tran.b = vif.b;
-    tran.c_in = vif.c_in;
+    mailbox mon_scb;
 
-    tran.sum = vif.sum;
-    tran.c_out = vif.c_out;
+    function new(virtual intf vif, mailbox mon_scb);
+        this.vif = vif;
+        this.mon_scb = mon_scb;
+    endfunction
 
-    mon2scb.put(tran); // put the data recieved from the DUT into the mailbox
-    tran.display("monitor class signals");
-end
-endtask
+    task run();
+     forever begin
+        transaction Stream_in;
+        Stream_in = new();
+
+        @(posedge vif.clk);
+        Stream_in.Stream = vif.Stream;
+
+        mon_scb.put(Stream_in);
+     end
+    endtask
 endclass
-
-

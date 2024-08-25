@@ -1,22 +1,32 @@
 `include "interface.sv"
 `include "test.sv"
 module testbench;
+    
+    reg clk;
 
-intf intff();
+    initial begin
+        clk <= 0;
+    end
 
-test tst (intff);
+    always #10 clk = ~clk;
 
-full_adder FA(
-    .a(intff.a),
-    .b(intff.b),
-    .c_in(intff.c_in),
-    .sum(intff.sum),
-    .c_out(intff.c_out)
-);
+    //create an instance of the interface
+    intf intff(clk);
 
-initial begin
-    $dumpfile("dump.vcd");
-    $dumpvars;
-end
+    //creating an instance of the test and passing the interface as the parameter
+    test tst(intff);
+
+    //connetcing the DUT
+  FSM f1(.clk(intff.clk),
+         .Stream(intff.Stream),
+         .Tone(intff.Tone),
+         .Counter(intff.Counter)
+           );
+
+
+    initial begin
+        $dumpfile("dump.vcd");
+        $dumpvars;
+    end
 
 endmodule

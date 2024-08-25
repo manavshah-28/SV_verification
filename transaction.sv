@@ -2,8 +2,8 @@ class transaction;
 rand bit Stream;
 
     function void display (string name);
-        $display("_____%s______", name);
-        $display("Stream bit = %0b",Stream);
+      $display("_____## %s ##______", name);
+      $display("Stream bit = %b",Stream);
         $display("_____________");
     endfunction
 

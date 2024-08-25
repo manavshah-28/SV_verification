@@ -8,11 +8,12 @@ class scoreboard;
     endfunction
 
     task run();
-        transaciton Stream;
+        transaction Stream;
         forever begin
 
             mon_scb.get(Stream);
-            $display("Stream bit = %0b", Stream);
+          $display ("___ ## Scoreboard ##  __");
+          $display("Stream bit = %0b", Stream.Stream); // access the stream bit inside the transaction object
         end
     endtask
 endclass

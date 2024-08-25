@@ -1,13 +1,16 @@
 //The stream of bits is given to the input pin labeled 'Stream'. The Tone is supposed to be logic high when the last bit of the sequence 101001 is properly detected.
 //The output Count is a counter to keep on incrementing the number of detected sequences.
-
 module FSM
   (
     input clk,
-    input wire Stream, // input bitstream is given at this pin
-    output wire Tone,  // this output is high when 
-    output logic [2:0] Counter
+    input Stream, // input bitstream is given at this pin
+    output logic Tone,  // this output is high when 
+    output logic [3:0] Counter
   );
+  
+  initial begin
+    Counter <= 4'b0000;
+  end
   
   localparam S0 = 3'b000,
              S1 = 3'b001,
@@ -26,11 +29,11 @@ module FSM
     Tone = 1'b0;
   end
   
-  always @(Stream)begin
+  always @(clk)begin
   cur_state <= nxt_state;  
   end
   
-  always @(Stream)begin
+  always @(clk)begin
     case(cur_state)
       S0: begin
         if(Stream == 1'b1)begin 
@@ -42,9 +45,10 @@ module FSM
       S1: begin
         if(Stream == 1'b0)begin
           nxt_state <= S2;
-          else nxt_state <= S1;
+        end
+        else nxt_state <= S1;
       end
-      end
+      
       S2: begin
         if(Stream == 1'b1)begin
           nxt_state <= S3;
@@ -67,7 +71,7 @@ module FSM
       end  
       S5: begin
         if(Stream == 1'b1)begin
-          nxt_state <= S1;
+          nxt_state <= S5;
         end
         else nxt_state <= S0;
       end  
@@ -75,10 +79,16 @@ module FSM
     endcase
   end
 
-  always @(cur_state)begin
+  always @(clk)begin
     if(cur_state ==  3'b101)begin
       Tone <= 1'b1;
     end
     else Tone <= 1'b0;
+  end
+  
+  always @(clk)begin
+    if(Tone)begin
+      Counter++;
+    end
   end
 endmodule      

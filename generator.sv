@@ -22,13 +22,13 @@ class generator;
 
 
 // main task to randomize the transaction and send it to the mailbox
-    task main();
+    task run();
         $display("Count: %0d", count);
         repeat(count)
         begin
             Stream = new();
             if(!Stream.randomize()) $fatal("Gen :: data randomize failed");
-            data.display("Generator");
+            Stream.display("Generator");
             // put the created transaction item into the mailbox 
             gen_drive.put(Stream);
         end

@@ -26,7 +26,7 @@ class driver;
          transaction item;
             gen_drive.get(item);
       @(posedge vif.clk);
-      vif.Stream <= item.stream;
+      vif.Stream <= item.Stream;
 
       num_transactions++;
       end
