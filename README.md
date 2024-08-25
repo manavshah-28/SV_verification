@@ -1,17 +1,29 @@
 ________________________________________________________________________________
 # SV_verification
-This repo hosts the system verilog verification of an FSM Sequence Detector
+
+This Repository is used to practice System Verilog Design and Verification. 
+
+I have structured the verification in a modular format to support reuseability.
 ________________________________________________________________________________
 ## DUT 
-
-The Sequence Detector specifications are as follows.
+The DUT or Device under test is a Sequence Detector made using a Finite State Machine.
 
 ![alt text](/docs/images/DUT.jpg)
 
-The stream of bits is given to the input pin labeled 'Stream'.
-The Tone is supposed to be logic high when the last bit of the sequence 101001 is properly detected.
+### DUT Specifications
 
-The output Count is a counter to keep on incrementing the number of detected sequences.
+* The stream of bits is given to the input pin labeled '**Stream**'.
+The '**Tone**' is supposed to be logic high when the last bit of the sequence **101001** is detected.
+
+* The output **Count** is a counter to keep on incrementing the number of detected sequences.
+
+
+### DUT Logic
+
+#### Finite State Machine
+![alt text](/docs/images/FSM.jpg)
+
+
 ________________________________________________________________________________
 ## Testbench Architecture
 
